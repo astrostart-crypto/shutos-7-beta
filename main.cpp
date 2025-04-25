@@ -9,12 +9,11 @@
 #include <memory>
 #include <stdexcept>
 
-// Define OS constants
 const std::string VERSION = "Enterprise 1.0";
 const std::string DEFAULT_USER = "user";
 const std::string DEFAULT_HOST = "shitOS-host";
 
-// ANSI color codes
+
 namespace Colors {
     const std::string RESET = "\033[0m";
     const std::string BOLD = "\033[1m";
@@ -26,7 +25,7 @@ namespace Colors {
     const std::string CYAN = "\033[36m";
 }
 
-// File system handler
+
 class FileSystem {
 private:
     struct File {
@@ -37,8 +36,7 @@ private:
     std::vector<File> files;
     
 public:
-    FileSystem() {
-        // Initialize with default files
+    FileSystem() 
         create_file("README.txt", "Welcome to ShitOS Enterprise Edition\n");
         create_file("TODOS.txt", "1. Improve system stability\n2. Add more features\n");
     }
@@ -82,7 +80,7 @@ public:
     }
 };
 
-// Calculator service
+ 
 class CalculatorService {
 public:
     double calculate(double a, double b, char op) const {
@@ -99,7 +97,6 @@ public:
     }
 };
 
-// System information provider
 class SystemInfo {
 private:
     time_t boot_time;
@@ -123,7 +120,6 @@ public:
     }
 };
 
-// Main application class
 class ShitOS {
 private:
     FileSystem fs;
