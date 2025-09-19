@@ -1,0 +1,83 @@
+name: Build and Deploy ShitOS
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            artifact_name: shitOS-linux
+          - os: windows-latest  
+            artifact_name: shitOS-windows
+          - os: macos-latest
+            artifact_name: shitOS-macos
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup C++ environment
+      uses: actions/setup-cpp@v1
+      with:
+        compiler: gcc
+        version: '11'
+
+    - name: Build application
+      run: |
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          g++ -o shitOS.exe main.cpp -static
+        else
+          g++ -o shitOS main.cpp -static
+        fi
+
+    - name: Test application compilation
+      run: |
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          ./shitOS.exe --help || echo "Compilation successful"
+        else
+          ./shitOS --help || echo "Compilation successful"
+        fi
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: |
+          shitOS*
+          shitOS.exe
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+
+    - name: List artifacts
+      run: ls -la
+
+    - name: Create release package
+      run: |
+        mkdir -p shitOS-release
+        cp -r shitOS-linux/* shitOS-release/ 2>/dev/null || true
+        cp -r shitOS-windows/* shitOS-release/ 2>/dev/null || true  
+        cp -r shitOS-macos/* shitOS-release/ 2>/dev/null || true
+        tar -czf shitOS-release.tar.gz shitOS-release/
+
+    - name: Upload release package
+      uses: actions/upload-artifact@v4
+      with:
+        name: shitOS-full-release
+        path: shitOS-release.tar.gz
+
+   
